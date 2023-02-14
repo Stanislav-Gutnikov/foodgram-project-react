@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator, MinValueValidator
 
 User = get_user_model()
 
+
 class Tag(models.Model):
     name = models.CharField(
         unique=True,
@@ -25,6 +26,7 @@ class Tag(models.Model):
     )
 
     class Meta:
+        ordering = ('name',)
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
@@ -43,7 +45,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингридиент'
         verbose_name_plural = 'Ингридиенты'
-        ordering = ['name',]
+        ordering = ['name', ]
 
     def __str__(self) -> str:
         return f'{self.name} {self.measurement_unit}'
@@ -87,7 +89,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ['-id',]
+        ordering = ['-id', ]
         verbose_name = 'Рецепт',
         verbose_name_plural = 'Рецепты'
 
@@ -104,6 +106,7 @@ class RecipeIngredients(models.Model):
     )
     ingredient = models.ForeignKey(
         Ingredient,
+        related_name='amount',
         on_delete=models.CASCADE,
         verbose_name='Ингридиент'
     )
@@ -116,11 +119,16 @@ class RecipeIngredients(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингредиент в рецепте'
-        verbose_name_plural = 'Ингредиенты в рецепте'
-
-    def __str__(self) -> str:
-        return f'{self.ingredient.name} - {self.ingredient.measurement_unit} {self.amount}'
+        constraints = (
+            models.UniqueConstraint(
+                fields=('recipe', 'ingredient',),
+                name='recipe_ingredient_exists'),
+            models.CheckConstraint(
+                check=models.Q(amount__gt=0),
+                name='amount_gt_0'),
+        )
+        verbose_name = ('Ингредиент в рецепте')
+        verbose_name_plural = ('Ингредиенты в рецепте')
 
 
 class ShoppingCart(models.Model):
@@ -136,6 +144,7 @@ class ShoppingCart(models.Model):
         related_name='carts',
         verbose_name='Рецепт'
     )
+
     class Meta:
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзина'
@@ -160,6 +169,7 @@ class Favorite(models.Model):
         related_name='favorites',
         verbose_name='Рецепт'
     )
+
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'

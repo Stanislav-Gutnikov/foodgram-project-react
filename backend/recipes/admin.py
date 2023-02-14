@@ -1,23 +1,24 @@
 from django.contrib import admin
 
-from .models import Tag, Recipe, Ingredient, RecipeIngredients
+from .models import Tag, Recipe, Ingredient
 
 
 @admin.register(Tag)
-class AdminTag(admin.ModelAdmin):
-    list_display = ('name', 'color', 'slug')
-
-
-@admin.register(Recipe)
-class AdminRecipe(admin.ModelAdmin):
-    list_display = ('id', 'name', 'author')
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'slug', 'color')
+    search_fields = ('name',)
 
 
 @admin.register(Ingredient)
-class AdminTag(admin.ModelAdmin):
-    list_display = ('name', 'measurement_unit')
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'measurement_unit')
+    search_fields = ('name',)
 
 
-@admin.register(RecipeIngredients)
-class AdminTag(admin.ModelAdmin):
-    list_display = ('recipe', 'ingredient', 'amount')
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'author',
+    )
