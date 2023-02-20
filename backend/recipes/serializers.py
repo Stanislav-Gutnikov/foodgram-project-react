@@ -1,7 +1,8 @@
 from rest_framework.serializers import (
     ModelSerializer,
     PrimaryKeyRelatedField,
-    ReadOnlyField
+    ReadOnlyField,
+    ValidationError
 )
 from rest_framework.fields import SerializerMethodField, IntegerField
 from django.contrib.auth import get_user_model
@@ -10,11 +11,10 @@ from drf_extra_fields.fields import Base64ImageField
 from .models import (
     Ingredient,
     Recipe,
-    RecipeIngredients,
+    RecipeIngredient,
     Tag, ShoppingCart,
     Favorite
 )
-
 from users.serializers import UserSerializer
 
 
@@ -34,7 +34,7 @@ class IngredientSerializer(ModelSerializer):
         fields = (
             'id',
             'name',
-            'measurement_unit'
+            'measurement_unit',
         )
 
 
@@ -43,7 +43,7 @@ class AddIngredientSerializer(ModelSerializer):
     amount = IntegerField()
 
     class Meta:
-        model = RecipeIngredients
+        model = RecipeIngredient
         fields = (
             'id',
             'amount',
@@ -56,7 +56,7 @@ class RecipeIngredientSerializer(ModelSerializer):
     measurement_unit = ReadOnlyField(source='ingredient.measurement_unit')
 
     class Meta:
-        model = RecipeIngredients
+        model = RecipeIngredient
         fields = (
             'id',
             'name',
@@ -84,6 +84,18 @@ class RecipeSerializer(ModelSerializer):
             'cooking_time'
         )
 
+    def validate(self, data):
+        ingredients = data.get('ingredients')
+        ingredient_list = []
+        for ingredient in ingredients:
+            ingredient_id = ingredient.get('id')
+            if ingredient_id in ingredient_list:
+                raise ValidationError({
+                    'ingredients': ('Этот ингредиент уже существует')
+                })
+            ingredient_list.append(ingredient_id)
+        return data
+
     def create(self, validated_data):
         author = self.context.get('request').user
         tags = validated_data.pop('tags')
@@ -92,6 +104,13 @@ class RecipeSerializer(ModelSerializer):
         self.create_tags(tags, recipe)
         self.create_ingredients(ingredients, recipe)
         return recipe
+
+    def update(self, instance, validated_data):
+        instance.tags.clear()
+        RecipeIngredient.objects.filter(recipe=instance).delete()
+        self.create_tags(validated_data.pop('tags'), instance)
+        self.create_ingredients(validated_data.pop('ingredients'), instance)
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         return RecipeListSerializer(
@@ -109,19 +128,19 @@ class RecipeSerializer(ModelSerializer):
     def create_ingredients(ingredients, recipe):
         new_ingredients = []
         for ingredient in ingredients:
-            new_ingredient = RecipeIngredients(
+            new_ingredient = RecipeIngredient(
                 recipe=recipe,
                 ingredient=ingredient['id'],
                 amount=ingredient['amount']
             )
             new_ingredients.append(new_ingredient)
-        RecipeIngredients.objects.bulk_create(new_ingredients)
+        RecipeIngredient.objects.bulk_create(new_ingredients)
 
 
 class RecipeListSerializer(ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = UserSerializer(read_only=True)
-    ingredients = SerializerMethodField(read_only=True)
+    ingredients = IngredientSerializer(read_only=True)
     is_favorited = SerializerMethodField(read_only=True)
     is_in_shopping_cart = SerializerMethodField(read_only=True)
 
@@ -140,9 +159,9 @@ class RecipeListSerializer(ModelSerializer):
             'is_in_shopping_cart'
             )
 
-    def get_ingredients(self, obj):
-        ingredients = RecipeIngredients.objects.filter(recipe=obj)
-        return RecipeIngredientSerializer(ingredients, many=True).data
+    #def get_ingredients(self, obj):
+        #ingredients = RecipeIngredient.objects.filter(recipe=obj)
+        #return RecipeIngredientSerializer(ingredients, many=True).data
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user

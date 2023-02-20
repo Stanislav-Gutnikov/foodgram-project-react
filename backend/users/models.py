@@ -3,9 +3,15 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    #ROLES = (
+        #('user', 'User'),
+        #('admin', 'Admin'),
+    #)
+    USER = 'user'
+    ADMIN = 'admin'
     ROLES = (
-        ('user', 'User'),
-        ('admin', 'Admin'),
+        (USER, 'User'),
+        (ADMIN, 'Admin'),
     )
     email = models.EmailField(
         max_length=254,
@@ -17,7 +23,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=50,
         choices=ROLES,
-        default='user'
+        default=USER
     )
     REQUIRED_FIELDS = [
         'username',

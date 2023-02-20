@@ -20,7 +20,7 @@ from .models import (
     Tag,
     Ingredient,
     Recipe,
-    RecipeIngredients,
+    RecipeIngredient,
     Favorite,
     ShoppingCart
 )
@@ -89,6 +89,7 @@ class RecipeViewSet(ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        #print(request.url_path)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED
@@ -124,7 +125,7 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
-        ingredients = RecipeIngredients.objects.filter(
+        ingredients = RecipeIngredient.objects.filter(
             recipe__carts__user=request.user
         ).values(
             'ingredient__name',
