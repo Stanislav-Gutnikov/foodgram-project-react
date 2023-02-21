@@ -3,10 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    #ROLES = (
-        #('user', 'User'),
-        #('admin', 'Admin'),
-    #)
     USER = 'user'
     ADMIN = 'admin'
     ROLES = (

@@ -51,68 +51,56 @@ class RecipeViewSet(ModelViewSet):
             self.permission_classes = (IsAuthenticated,)
         return super().get_permissions()
 
-    @action(
-        detail=True,
-        methods=('post', 'delete'),
-        permission_classes=(IsAuthenticated),
-        url_path='favorite'
-        )
-    def favorite(self, request, pk=None):
+    def add_to_delete_from(self, request, pk=None):
         data = {
             'user': request.user.id,
             'recipe': pk
             }
-        serializer = FavoriteSerializer(
-            data=data,
-            context={'request': request}
-        )
+        serializer = None
+        if 'favorite' in request.path:
+            serializer = FavoriteSerializer(
+                data=data,
+                context={'request': request}
+            )
+            model = Favorite
+        elif 'shopping_cart' in request.path:
+            serializer = ShoppingCartSerializer(
+                data=data,
+                context={'request': request}
+            )
+            model = ShoppingCart
         if request.method == 'POST':
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
                 serializer.data,
                 status=status.HTTP_201_CREATED)
-
         elif request.method == 'DELETE':
             user = request.user
             recipe = get_object_or_404(Recipe, id=pk)
-            favorite = get_object_or_404(
-                Favorite,
+            obj = get_object_or_404(
+                model,
                 user=user,
                 recipe=recipe
                 )
-            favorite.delete()
+            obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
         methods=('post', 'delete'),
         permission_classes=(IsAuthenticated),
-        url_path='shopping_cart'
         )
-    def add_to_shopping_cart(self, request, pk=None):
-        if request.method == 'POST':
-            data = {
-                'user': request.user.id,
-                'recipe': pk
-                }
-            serializer = ShoppingCartSerializer(
-                data=data,
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == 'DELETE':
-            user = request.user
-            recipe = get_object_or_404(Recipe, id=pk)
-            shopping_cart = get_object_or_404(
-                ShoppingCart,
-                user=user,
-                recipe=recipe
-                )
-            shopping_cart.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+    def favorite(self, request, pk=None):
+        return self.add_to_delete_from(request, pk)
+
+    @action(
+        detail=True,
+        methods=('post', 'delete'),
+        permission_classes=(IsAuthenticated),
+        )
+    def shopping_cart(self, request, pk=None):
+        return self.add_to_delete_from(request, pk)
 
     @action(
         detail=False,
