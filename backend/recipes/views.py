@@ -51,24 +51,16 @@ class RecipeViewSet(ModelViewSet):
             self.permission_classes = (IsAuthenticated,)
         return super().get_permissions()
 
-    def add_to_delete_from(self, request, pk=None):
+    def add_to_delete_from(self, serializer, model, request, pk=None):
         data = {
             'user': request.user.id,
             'recipe': pk
             }
-        serializer = None
-        if 'favorite' in request.path:
-            serializer = FavoriteSerializer(
-                data=data,
-                context={'request': request}
-            )
-            model = Favorite
-        elif 'shopping_cart' in request.path:
-            serializer = ShoppingCartSerializer(
-                data=data,
-                context={'request': request}
-            )
-            model = ShoppingCart
+
+        serializer = serializer(
+            data=data,
+            context={'request': request}
+        )
         if request.method == 'POST':
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -92,7 +84,14 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=(IsAuthenticated),
         )
     def favorite(self, request, pk=None):
-        return self.add_to_delete_from(request, pk)
+        serializer = ShoppingCartSerializer
+        model = ShoppingCart
+        return self.add_to_delete_from(
+            serializer,
+            model,
+            request,
+            pk
+            )
 
     @action(
         detail=True,
@@ -100,7 +99,14 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=(IsAuthenticated),
         )
     def shopping_cart(self, request, pk=None):
-        return self.add_to_delete_from(request, pk)
+        serializer = ShoppingCartSerializer
+        model = ShoppingCart
+        return self.add_to_delete_from(
+            serializer,
+            model,
+            request,
+            pk
+            )
 
     @action(
         detail=False,
