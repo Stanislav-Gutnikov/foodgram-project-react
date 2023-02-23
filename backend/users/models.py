@@ -59,3 +59,4 @@ class Subscriptions(models.Model):
             fields=['user', 'author'],
             name='unique_follow'
         ),)
+
