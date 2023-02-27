@@ -13,10 +13,9 @@ services:
 
   backend:
 
-    build: 
-      context: ../backend
-      dockerfile: Dockerfile
-    #restart: always
+    image: stanislavgutnikov/products:latest
+    container_name: backend
+    restart: always
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
