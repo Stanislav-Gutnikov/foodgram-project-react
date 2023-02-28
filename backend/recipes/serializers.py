@@ -178,7 +178,7 @@ class RecipeListSerializer(ModelSerializer):
 class ShoppingCartSerializer(ModelSerializer):
     class Meta:
         model = ShoppingCart
-        fields = ('id', 'user', 'recipe',)
+        fields = ('id', 'user', 'recipe')
 
 
 class FavoriteSerializer(ModelSerializer):
