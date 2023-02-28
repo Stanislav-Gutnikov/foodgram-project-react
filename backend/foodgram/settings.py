@@ -9,7 +9,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '*',
-    #'51.250.84.193'
+    '51.250.84.193'
     ]
 
 INSTALLED_APPS = [
