@@ -8,8 +8,8 @@ class RecipeFilter(FilterSet):
     tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug'
     )
-    is_in_favorite = filters.BooleanFilter(
-        method='filter_is_in_favorite'
+    is_favorited = filters.BooleanFilter(
+        method='filter_is_favorited'
     )
     is_in_shopping_cart = filters.BooleanFilter(
         method='filter_is_in_shopping_cart'
@@ -20,11 +20,11 @@ class RecipeFilter(FilterSet):
         fields = (
             'author',
             'tags',
-            'is_in_favorite',
+            'is_favorited',
             'is_in_shopping_cart'
         )
         
-    def filter_is_in_favorite(self, queryset, name, value):
+    def filter_is_favorited(self, queryset, name, value):
         if value:
             return queryset.filter(favorites__user=self.request.user)
         return queryset

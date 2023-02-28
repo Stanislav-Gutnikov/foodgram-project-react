@@ -84,8 +84,8 @@ class RecipeViewSet(ModelViewSet):
         permission_classes=(IsAuthenticated),
         )
     def favorite(self, request, pk=None):
-        serializer = ShoppingCartSerializer
-        model = ShoppingCart
+        serializer = FavoriteSerializer
+        model = Favorite
         return self.add_to_delete_from(
             serializer,
             model,
