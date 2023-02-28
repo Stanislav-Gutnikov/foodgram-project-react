@@ -12,10 +12,7 @@ services:
     restart: always
 
   backend:
-    build:  
-      context: ../backend 
-      dockerfile: Dockerfile
-    #image: stanislavgutnikov/products:latest
+    image: stanislavgutnikov/products:latest
     container_name: backend
     restart: always
     volumes:
