@@ -94,6 +94,13 @@ class RecipeSerializer(ModelSerializer):
                     'ingredients': ('Этот ингредиент уже существует')
                 })
             ingredient_list.append(ingredient_id)
+            amount = ingredient.get('amount')
+            if int(amount) <= 0:
+                raise ValidationError({
+                    'amount': (
+                        'Количество ингредиентов не может быть отрицательным'
+                        )
+                })
         return data
 
     def create(self, validated_data):

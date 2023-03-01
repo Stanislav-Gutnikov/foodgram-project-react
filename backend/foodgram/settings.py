@@ -5,7 +5,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='zadq*66y51(52aejfh+0+@o3pp&4mgqvomz3%x*rir57c^)cdb')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '*',

@@ -25,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         return super(UserSerializer, self).create(validated_data)
 
-    def is_subscribed(self, obj):
+    def get_is_subscribed(self, obj):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
@@ -95,7 +95,7 @@ class SubscrptionsSerializer(serializers.ModelSerializer):
     last_name = serializers.ReadOnlyField(source='author.last_name')
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
-    is_subscribe = serializers.SerializerMethodField(read_only=True)
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Subscriptions
@@ -107,7 +107,7 @@ class SubscrptionsSerializer(serializers.ModelSerializer):
             'last_name',
             'recipes',
             'recipes_count',
-            'is_subscribe',
+            'is_subscribed',
         )
 
     def get_recipes(self, obj):
@@ -131,7 +131,7 @@ class SubscrptionsSerializer(serializers.ModelSerializer):
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author_id).count()
 
-    def get_is_subscribe(self, obj):
+    def get_is_subscribed(self, obj):
         user = self.context.get('request').user
         if not user:
             return False
